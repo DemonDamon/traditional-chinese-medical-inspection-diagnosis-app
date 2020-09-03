@@ -1,0 +1,2 @@
+include ':app', ':openCVLibrary348'
+rootProject.name='Inspection Diagnosis App'
