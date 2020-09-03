@@ -241,7 +241,7 @@ public abstract class CameraActivity extends AppCompatActivity
             // Initialize the storage bitmaps once when the resolution is known.
             if (rgbBytes == null) {
 //        camera.setDisplayOrientation(180);
-                turnLightOn(camera); //打开闪光灯，效果会好很多
+//                turnLightOn(camera); //打开闪光灯，效果会好很多
                 Camera.Size previewSize = camera.getParameters().getPreviewSize();
                 previewHeight = previewSize.height;
                 previewWidth = previewSize.width;

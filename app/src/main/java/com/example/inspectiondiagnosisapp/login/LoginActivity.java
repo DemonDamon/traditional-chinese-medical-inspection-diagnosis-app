@@ -1,6 +1,7 @@
 package com.example.inspectiondiagnosisapp.login;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.example.inspectiondiagnosisapp.DetectorActivity;
+import com.example.inspectiondiagnosisapp.MainActivity;
 import com.example.inspectiondiagnosisapp.R;
 
 public class LoginActivity extends AppCompatActivity {
@@ -110,6 +113,10 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
+                Intent intent = new Intent();
+                intent.setClass(LoginActivity.this, MainActivity.class);
+                LoginActivity.this.startActivity(intent);
+
             }
         });
     }

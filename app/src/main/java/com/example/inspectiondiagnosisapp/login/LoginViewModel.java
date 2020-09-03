@@ -1,12 +1,17 @@
 package com.example.inspectiondiagnosisapp.login;
 
+import android.content.Intent;
+import android.content.Context;
 import android.util.Patterns;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.inspectiondiagnosisapp.DetectorActivity;
+import com.example.inspectiondiagnosisapp.MainActivity;
 import com.example.inspectiondiagnosisapp.R;
+import com.example.inspectiondiagnosisapp.ThirdActivity;
 import com.example.inspectiondiagnosisapp.data.LoginRepository;
 import com.example.inspectiondiagnosisapp.data.Result;
 import com.example.inspectiondiagnosisapp.data.model.LoggedInUser;
