@@ -7,20 +7,21 @@ import android.media.FaceDetector;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import org.opencv.features2d.BOWTrainer;
 
 public class MainActivity extends AppCompatActivity{
-    Button btn1, btn2;
+    ImageView img_inspect, img_qa;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_select);
 
-        btn1 = (Button)findViewById(R.id.btn1);
-        btn2 = (Button)findViewById(R.id.btn2);
+        img_inspect = (ImageView)findViewById(R.id.img_inspect);
+        img_qa = (ImageView)findViewById(R.id.img_qa);
 
-        btn1.setOnClickListener(new View.OnClickListener() {
+        img_inspect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -30,14 +31,16 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        btn2.setOnClickListener(new View.OnClickListener() {
+        img_qa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
-                intent.setClass(MainActivity.this, DetectorActivity.class);
+                intent.setClass(MainActivity.this, TCMChatbotActivity.class);
                 MainActivity.this.startActivity(intent);
                 // startActivity(new Intent(this, DetectorActivity.class));
             }
         });
     }
 }
+
+

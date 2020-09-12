@@ -58,7 +58,7 @@ public class DetectorActivity extends CameraActivity implements
     // 为SSD模型配置参数
     private static final int TF_OD_API_INPUT_SIZE = 300;
     private static final boolean TF_OD_API_IS_QUANTIZED = false;
-    private static final String TF_OD_API_MODEL_FILE = "tongue_detect.tflite";
+    private static final String TF_OD_API_MODEL_FILE = "tongue_detect_1.tflite";
     private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/tonguelabelmap.txt";
     private static final DetectorMode MODE = DetectorMode.TF_OD_API;
     // 最小的检测置信度
@@ -73,8 +73,6 @@ public class DetectorActivity extends CameraActivity implements
 
     private Classifier detector;
 
-    private long lastProcessingTimeMs;
-    private long lastProcessingTimeMs1;
     private Bitmap rgbFrameBitmap = null; // 手机拍摄的原图
     private Bitmap croppedBitmap = null;
     private Bitmap cropCopyBitmap = null;
@@ -229,8 +227,6 @@ public class DetectorActivity extends CameraActivity implements
                         // 使得computingDetection参数一直为True，这样就无法继续下面的图像检测
                         final List<Classifier.Recognition> results = detector.recognizeImage(croppedBitmap);
 
-                        lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-
                         cropCopyBitmap = Bitmap.createBitmap(croppedBitmap); // 完全复制croppedBitmap
                         final Canvas canvas = new Canvas(cropCopyBitmap);
                         final Paint paint = new Paint();
@@ -269,7 +265,7 @@ public class DetectorActivity extends CameraActivity implements
 
                                         if (SAVE_PREVIEW_BITMAP) {
 
-                                            File file = ImageUtils.saveBitmap(context, rgbFrameBitmap, location, imageVar[0]);
+                                            File file = ImageUtils.saveBitmap(context, rgbFrameBitmap, location, imageVar[0], "tongue");
 //                                            // 登陆后台请求舌像分类服务
 //                                            final long startTime1 = SystemClock.uptimeMillis();
 //                                            ImageUpload.send(file);
@@ -291,7 +287,7 @@ public class DetectorActivity extends CameraActivity implements
 
                                         savePicId = 0;
                                         for (int i = 0; i < imgVarNum.length; i++){
-                                            File tmpFile = new File(context.getExternalFilesDir(null) + "/tflite/",
+                                            File tmpFile = new File(context.getExternalFilesDir(null) + "/tongue/",
                                                     imgVarNum[i] + ".jpeg");
                                             if (tmpFile.length()==0){
                                                 tmpFile.delete();
@@ -304,12 +300,12 @@ public class DetectorActivity extends CameraActivity implements
                                             Bundle bundle = new Bundle();
                                             bundle.putString("results", null);
                                             intent.putExtras(bundle);
+                                            finish();
                                             DetectorActivity.this.startActivity(intent);
                                         }else{
-                                            mostClearImgFile = new File(context.getExternalFilesDir(null) + "/tflite/",
+                                            mostClearImgFile = new File(context.getExternalFilesDir(null) + "/tongue/",
                                                     imgNotNoneSaved[savePicId-1] + ".jpeg");
                                             System.out.println(mostClearImgFile);
-
                                             Response response = ImageUpload.send(mostClearImgFile);
 
                                             try {
@@ -319,7 +315,7 @@ public class DetectorActivity extends CameraActivity implements
                                                 bundle.putString("results", response.body().string());
                                                 intent.putExtras(bundle);
 
-                                                for (File file: new File(context.getExternalFilesDir(null) + "/tflite/").listFiles()){
+                                                for (File file: new File(context.getExternalFilesDir(null) + "/tongue/").listFiles()){
                                                     // 删除文件夹下，除了mostClearImgFile以外的所有舌像
                                                     if(!file.equals(mostClearImgFile)){
                                                         file.delete();
@@ -327,6 +323,7 @@ public class DetectorActivity extends CameraActivity implements
 //                                                    // 删除所有舌象
 //                                                    file.delete();
                                                 }
+                                                finish();
                                                 DetectorActivity.this.startActivity(intent);
                                             } catch (IOException e) {
                                                 e.printStackTrace();
@@ -345,15 +342,6 @@ public class DetectorActivity extends CameraActivity implements
 
                         computingDetection = false;
 
-                        runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showFrameInfo(previewWidth + "x" + previewHeight);
-                                        showCropInfo(cropCopyBitmap.getWidth() + "x" + cropCopyBitmap.getHeight());
-                                        showInference(lastProcessingTimeMs + "ms");
-                                    }
-                                });
                     }
                 });
         LOGGER.i("step out processImage function...");

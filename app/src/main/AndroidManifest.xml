@@ -28,6 +28,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity"/>
+        <activity android:name=".FaceLipEyeColorClsActivity"/>
+        <activity android:name=".TongueDetectActivity"/>
         <activity android:name=".DetectorActivity"/>
         <activity android:name=".ThirdActivity"/>
     </application>

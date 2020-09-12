@@ -3,6 +3,7 @@ package com.example.inspectiondiagnosisapp;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -42,12 +43,12 @@ import java.util.List;
 import org.opencv.android.OpenCVLoader;
 import com.example.inspectiondiagnosisapp.env.ImageUtils;
 import com.example.inspectiondiagnosisapp.env.Logger;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public abstract class CameraActivity extends AppCompatActivity
         implements OnImageAvailableListener, // 摄像头拍摄到照片的回调接口
-        Camera.PreviewCallback, // 打开摄像头时的回调PreviewCallback接口，并监听onPreviewFrame函数
-        CompoundButton.OnCheckedChangeListener,
-        View.OnClickListener {
+        Camera.PreviewCallback // 打开摄像头时的回调PreviewCallback接口，并监听onPreviewFrame函数
+    {
     private static final Logger LOGGER = new Logger();
 
     private static final int PERMISSIONS_REQUEST = 1;
@@ -66,15 +67,17 @@ public abstract class CameraActivity extends AppCompatActivity
     private Runnable postInferenceCallback;
     private Runnable imageConverter;
 
-    private LinearLayout bottomSheetLayout;
-    private LinearLayout gestureLayout;
-    private BottomSheetBehavior sheetBehavior;
-
     protected TextView frameValueTextView, cropValueTextView, inferenceTimeTextView;
-    protected ImageView bottomSheetArrowImageView;
-    private ImageView plusImageView, minusImageView;
-    private SwitchCompat apiSwitchCompat;
-    private TextView threadsTextView;
+    private FloatingActionButton btnSwitchCam;
+
+    private static final String KEY_USE_FACING = "use_facing";
+    private Integer useFacing = null;
+    private String cameraId = null;
+
+    protected Integer getCameraFacing() {
+        return useFacing;
+    }
+
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -101,71 +104,44 @@ public abstract class CameraActivity extends AppCompatActivity
 
         PermissionUtil.setActivePermissions(this);
 
-        threadsTextView = findViewById(R.id.threads);
-        plusImageView = findViewById(R.id.plus);
-        minusImageView = findViewById(R.id.minus);
-        apiSwitchCompat = findViewById(R.id.api_info_switch);
-        bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
-        gestureLayout = findViewById(R.id.gesture_layout);
-        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-        bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
+        btnSwitchCam = findViewById(R.id.fab_switchcam);
 
-        ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                            gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                        } else {
-                            gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        }
-                        //                int width = bottomSheetLayout.getMeasuredWidth();
-                        int height = gestureLayout.getMeasuredHeight();
+        btnSwitchCam.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSwitchCamClick();
+            }
+        });
 
-                        sheetBehavior.setPeekHeight(height);
-                    }
-                });
-        sheetBehavior.setHideable(false); // 永远可见，设置为true则可以永远隐藏bottom_sheet_layout
-
-        sheetBehavior.setBottomSheetCallback(
-                new BottomSheetBehavior.BottomSheetCallback() {
-                    @Override
-                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                        switch (newState) {
-                            case BottomSheetBehavior.STATE_HIDDEN:
-                                break;
-                            case BottomSheetBehavior.STATE_EXPANDED:
-                            {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_down);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_COLLAPSED:
-                            {
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                            }
-                            break;
-                            case BottomSheetBehavior.STATE_DRAGGING:
-                                break;
-                            case BottomSheetBehavior.STATE_SETTLING:
-                                bottomSheetArrowImageView.setImageResource(R.drawable.icn_chevron_up);
-                                break;
-                        }
-                    }
-
-                    @Override
-                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
-                });
-
-        frameValueTextView = findViewById(R.id.frame_info);
-        cropValueTextView = findViewById(R.id.crop_info);
-        inferenceTimeTextView = findViewById(R.id.inference_info);
-
-        apiSwitchCompat.setOnCheckedChangeListener(this);
-
-        plusImageView.setOnClickListener(this);
-        minusImageView.setOnClickListener(this);
         LOGGER.i("onCreate Done!!!"); // 执行完onCreate
+    }
+
+    private void onSwitchCamClick() {
+        switchCamera();
+    }
+
+    public void switchCamera() {
+
+        Intent intent = getIntent();
+
+        if (useFacing == CameraCharacteristics.LENS_FACING_FRONT) {
+            useFacing = CameraCharacteristics.LENS_FACING_BACK;
+        } else {
+            useFacing = CameraCharacteristics.LENS_FACING_FRONT;
+        }
+
+        intent.putExtra(KEY_USE_FACING, useFacing);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
+        restartWith(intent);
+
+    }
+
+    private void restartWith(Intent intent) {
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
     }
 
     //OpenCV库静态加载并初始化
@@ -241,7 +217,7 @@ public abstract class CameraActivity extends AppCompatActivity
             // Initialize the storage bitmaps once when the resolution is known.
             if (rgbBytes == null) {
 //        camera.setDisplayOrientation(180);
-//                turnLightOn(camera); //打开闪光灯，效果会好很多
+                turnLightOn(camera); //打开闪光灯，效果会好很多
                 Camera.Size previewSize = camera.getParameters().getPreviewSize();
                 previewHeight = previewSize.height;
                 previewWidth = previewSize.width;
@@ -548,33 +524,6 @@ public abstract class CameraActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        setUseNNAPI(isChecked);
-        if (isChecked) apiSwitchCompat.setText("NNAPI");
-        else apiSwitchCompat.setText("TFLITE");
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.plus) {
-            String threads = threadsTextView.getText().toString().trim();
-            int numThreads = Integer.parseInt(threads);
-            if (numThreads >= 9) return;
-            numThreads++;
-            threadsTextView.setText(String.valueOf(numThreads));
-            setNumThreads(numThreads);
-        } else if (v.getId() == R.id.minus) {
-            String threads = threadsTextView.getText().toString().trim();
-            int numThreads = Integer.parseInt(threads);
-            if (numThreads == 1) {
-                return;
-            }
-            numThreads--;
-            threadsTextView.setText(String.valueOf(numThreads));
-            setNumThreads(numThreads);
-        }
-    }
 
     protected void showFrameInfo(String frameInfo) {
         frameValueTextView.setText(frameInfo);

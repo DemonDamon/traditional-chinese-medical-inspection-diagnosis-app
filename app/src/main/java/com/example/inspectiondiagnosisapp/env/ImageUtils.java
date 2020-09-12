@@ -86,13 +86,13 @@ public class ImageUtils {
     return ySize + uvSize;
   }
 
-  public static File saveBitmap(Context context, final Bitmap bitmap, final RectF location, double imageVar) {
-    File file = saveBitmap(context, bitmap, location, Double.toString(imageVar)+".jpeg");
+  public static File saveBitmap(Context context, final Bitmap bitmap, final RectF location, double imageVar, String faceortongue) {
+    File file = saveBitmap(context, bitmap, location, Double.toString(imageVar)+".jpeg", faceortongue);
     return file;
   }
 
-  public static File saveBitmap(Context context, final Bitmap bitmap, final RectF location, final String filename) {
-    final String root = context.getExternalFilesDir(null) + "/tflite" ;
+  public static File saveBitmap(Context context, final Bitmap bitmap, final RectF location, final String filename, String faceortongue) {
+    final String root = context.getExternalFilesDir(null) + "/" + faceortongue;
     LOGGER.i("Saving %dx%d bitmap to %s.", bitmap.getWidth(), bitmap.getHeight(), root);
     final File myDir = new File(root);
     myDir.mkdirs();

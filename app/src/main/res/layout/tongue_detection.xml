@@ -7,7 +7,8 @@
     android:layout_height="match_parent"
     android:background="#00000000">
 
-    <RelativeLayout
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/black"
@@ -24,8 +25,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:layout_alignParentTop="true"
-            app:logo="@drawable/icn_tf_lite">
+            android:layout_alignParentTop="true">
+<!--            app:logo="@drawable/icn_tf_lite">-->
             <!--            android:background="@color/semi_transparent">-->
 
             <!--            <ImageView-->
@@ -36,7 +37,14 @@
 
     </RelativeLayout>
 
-    <include
-        android:id="@+id/bottom_sheet_layout"
-        layout="@layout/layout_bottom_sheet" />
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_switchcam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|top"
+        android:tint="@android:color/white"
+        android:src="@drawable/ic_baseline_switch_camera_24"
+        android:layout_margin="16dp"
+        />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
